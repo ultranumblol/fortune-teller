@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>八字命理 AI 命师</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0e0c0a;
+      --card:    #161310;
+      --card2:   #1e1a16;
+      --border:  #2e2820;
+      --text:    #e8ddd0;
+      --muted:   #8a7a6a;
+      --gold:    #c9963a;
+      --gold2:   #f0c060;
+      --red:     #c0392b;
+      --red2:    #e74c3c;
+      --jade:    #27ae60;
+      --blue:    #2980b9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(201,150,58,.04) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(192,57,43,.03) 0%, transparent 50%);
+    }
+
+    /* ── TOP BAR ──────────────────────────────────────── */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(14,12,10,.95);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: 18px;
+      color: var(--gold2);
+      letter-spacing: .05em;
+    }
+    .logo-icon { font-size: 24px; }
+    .logo-sub { font-size: 11px; color: var(--muted); font-family: 'Noto Sans SC'; font-weight: 300; margin-top: 2px; letter-spacing: .08em; }
+    .top-note { font-size: 11px; color: var(--muted); }
+
+    /* ── CONTAINER ───────────────────────────────────── */
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+
+    /* ── HERO ────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 48px 20px 32px;
+    }
+    .hero-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 36px; font-weight: 900;
+      color: var(--gold2);
+      letter-spacing: .12em;
+      text-shadow: 0 0 40px rgba(201,150,58,.3);
+      margin-bottom: 10px;
+    }
+    .hero-sub {
+      font-size: 13px; color: var(--muted); letter-spacing: .06em;
+      line-height: 1.8;
+    }
+    .hero-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 24px auto; max-width: 400px;
+    }
+    .hero-divider::before, .hero-divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .hero-divider span { color: var(--gold); font-size: 18px; }
+
+    /* ── FORM CARD ───────────────────────────────────── */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .form-card::before {
+      content: '命';
+      position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 160px; font-weight: 900;
+      color: rgba(201,150,58,.04);
+      pointer-events: none; user-select: none;
+      line-height: 1;
+    }
+    .form-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 15px; color: var(--gold); letter-spacing: .06em;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+    }
+    .form-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label {
+      font-size: 11px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    input, select, textarea {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 14px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .2s;
+      width: 100%;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+    select option { background: var(--card2); }
+    textarea { resize: vertical; min-height: 70px; }
+
+    .shichen-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    }
+    @media (max-width: 480px) { .shichen-grid { grid-template-columns: repeat(3, 1fr); } }
+    .shichen-btn {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 4px;
+      color: var(--muted); font-size: 12px; cursor: pointer;
+      transition: all .2s; text-align: center;
+    }
+    .shichen-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .shichen-btn.active {
+      background: rgba(201,150,58,.15);
+      border-color: var(--gold);
+      color: var(--gold2);
+      font-weight: 600;
+    }
+    .shichen-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    .btn-calc {
+      width: 100%; margin-top: 20px;
+      background: linear-gradient(135deg, #8b6914, #c9963a, #f0c060, #c9963a);
+      background-size: 300% 100%;
+      border: none; border-radius: 10px;
+      padding: 14px;
+      color: #0e0c0a;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 16px; font-weight: 700;
+      letter-spacing: .1em;
+      cursor: pointer;
+      transition: background-position .4s, opacity .2s, transform .1s;
+    }
+    .btn-calc:hover { background-position: 100% 0; }
+    .btn-calc:active { transform: scale(.98); }
+    .btn-calc:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── SPINNER ─────────────────────────────────────── */
+    .spinner-wrap { text-align: center; padding: 40px 0; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-text { color: var(--muted); margin-top: 12px; font-size: 13px; }
+
+    /* ── CHART CARD ──────────────────────────────────── */
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .chart-header {
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    }
+    .chart-name {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 20px; font-weight: 700; color: var(--gold2);
+    }
+    .chart-birth { font-size: 12px; color: var(--muted); }
+    .chart-shengxiao {
+      font-size: 11px;
+      background: rgba(201,150,58,.1);
+      border: 1px solid rgba(201,150,58,.3);
+      color: var(--gold);
+      padding: 2px 10px; border-radius: 12px;
+    }
+
+    /* 四柱表格 */
+    .pillar-table { width: 100%; border-collapse: collapse; }
+    .pillar-table th {
+      background: var(--card2);
+      padding: 10px;
+      font-size: 11px; color: var(--muted);
+      text-align: center; font-weight: 500;
+      letter-spacing: .05em;
+      border-bottom: 1px solid var(--border);
+    }
+    .pillar-table td {
+      padding: 8px 10px; text-align: center;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .pillar-table td:last-child { border-right: none; }
+    .row-label {
+      font-size: 11px; color: var(--muted); text-align: left !important;
+      padding-left: 16px !important; white-space: nowrap;
+      background: rgba(0,0,0,.2);
+    }
+    .ganzhi-big {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 28px; font-weight: 700;
+      letter-spacing: -.02em;
+    }
+    .elem-tag {
+      display: inline-block;
+      font-size: 11px; padding: 1px 6px; border-radius: 10px;
+      margin-top: 2px;
+    }
+    .elem-木 { color: #27ae60; background: rgba(39,174,96,.1); }
+    .elem-火 { color: #e74c3c; background: rgba(231,76,60,.1); }
+    .elem-土 { color: #e67e22; background: rgba(230,126,34,.1); }
+    .elem-金 { color: #f0c060; background: rgba(240,192,96,.1); }
+    .elem-水 { color: #3498db; background: rgba(52,152,219,.1); }
+
+    .shishen-tag {
+      display: inline-block;
+      font-size: 11px; padding: 2px 8px; border-radius: 10px;
+      background: rgba(201,150,58,.1);
+      border: 1px solid rgba(201,150,58,.2);
+      color: var(--gold);
+    }
+    .shishen-rizhun { color: var(--gold2); font-weight: 700; }
+
+    .canggan-cell { font-size: 12px; color: var(--muted); letter-spacing: .05em; }
+
+    /* 五行统计 */
+    .wuxing-section { padding: 16px 20px; border-top: 1px solid var(--border); }
+    .wuxing-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+    .wx-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .wx-name { width: 20px; font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 700; }
+    .wx-bar-bg { flex: 1; height: 8px; background: var(--card2); border-radius: 4px; overflow: hidden; }
+    .wx-bar-fill { height: 100%; border-radius: 4px; transition: width .5s; }
+    .wx-score { width: 32px; text-align: right; font-size: 12px; color: var(--muted); }
+
+    /* 大运 */
+    .dayun-section { padding: 16px 20px; border-top: 1px solid var(--border); }
+    .dayun-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+    .dayun-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .dayun-item {
+      flex-shrink: 0;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px;
+      text-align: center; min-width: 68px;
+    }
+    .dy-gz {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 20px; font-weight: 700; color: var(--gold2);
+    }
+    .dy-age { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .dy-elem { font-size: 10px; margin-top: 2px; }
+
+    /* ── AI READING ──────────────────────────────────── */
+    .reading-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .reading-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .reading-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 15px; color: var(--gold); letter-spacing: .06em;
+    }
+    .question-input-row { display: flex; gap: 8px; }
+    .question-input-row input {
+      flex: 1; min-width: 200px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px;
+      color: var(--text); font-size: 13px;
+    }
+    .btn-reading {
+      background: linear-gradient(135deg, var(--red), #e74c3c);
+      border: none; border-radius: 8px; padding: 8px 20px;
+      color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      font-family: 'Noto Serif SC', serif;
+      letter-spacing: .04em;
+      transition: opacity .2s;
+    }
+    .btn-reading:hover { opacity: .85; }
+    .btn-reading:disabled { opacity: .4; cursor: not-allowed; }
+
+    .reading-body {
+      padding: 24px 28px;
+      font-size: 14px; line-height: 2;
+      color: var(--text);
+      min-height: 100px;
+      white-space: pre-wrap;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+    .reading-body .reading-placeholder {
+      color: var(--muted); font-size: 13px; text-align: center; padding: 20px;
+    }
+    .cursor-blink {
+      display: inline-block; width: 2px; height: 1em;
+      background: var(--gold); animation: blink .8s step-end infinite;
+      vertical-align: text-bottom; margin-left: 1px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* reading text styling */
+    .reading-body strong, .reading-body b { color: var(--gold2); }
+
+    /* ── ERROR ───────────────────────────────────────── */
+    .error-box {
+      background: rgba(192,57,43,.1); border: 1px solid rgba(192,57,43,.3);
+      border-radius: 10px; padding: 14px 18px; color: var(--red2); font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    .footer {
+      text-align: center; padding: 24px 20px;
+      font-size: 11px; color: var(--muted);
+      border-top: 1px solid var(--border);
+      line-height: 1.8; letter-spacing: .04em;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">
+    <span class="logo-icon">☯</span>
+    <div>
+      <div>八字命理 AI 命师</div>
+      <div class="logo-sub">三命通会 · 滴天髓 · 陆致极体系 · 梁湘润体系</div>
+    </div>
+  </div>
+  <div class="top-note">四柱排盘 · 格局用神 · 流年大运</div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-title">命由天定　运在人为</div>
+    <div class="hero-sub">输入生辰八字，AI 依据经典命理著作为您推算四柱格局<br>解析五行旺衰、用神喜忌、流年大运</div>
+    <div class="hero-divider"><span>❖</span></div>
+  </div>
+
+  <!-- ── 输入表单 ── -->
+  <div class="form-card" id="form-card">
+    <div class="form-title">填写生辰信息</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>姓名（可用化名）</label>
+        <input id="f-name" type="text" placeholder="如：张三" />
+      </div>
+      <div class="form-group">
+        <label>性别</label>
+        <select id="f-gender">
+          <option value="男">男</option>
+          <option value="女">女</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>出生年份</label>
+        <input id="f-year" type="number" min="1900" max="2025" placeholder="如：1990" />
+      </div>
+      <div class="form-group">
+        <label>出生月份</label>
+        <select id="f-month">
+          <option value="">请选择</option>
+          <option value="1">1月</option><option value="2">2月</option>
+          <option value="3">3月</option><option value="4">4月</option>
+          <option value="5">5月</option><option value="6">6月</option>
+          <option value="7">7月</option><option value="8">8月</option>
+          <option value="9">9月</option><option value="10">10月</option>
+          <option value="11">11月</option><option value="12">12月</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>出生日期</label>
+        <input id="f-day" type="number" min="1" max="31" placeholder="如：15" />
+      </div>
+      <div class="form-group">
+        <label>关注重点</label>
+        <select id="f-question-preset">
+          <option value="综合命运解读，包括性格、事业、财运、感情、健康各方面">综合命运解读</option>
+          <option value="感情婚姻分析：配偶缘分、婚姻时机、感情运势">感情婚姻</option>
+          <option value="事业财运分析：适合方向、财运高峰、贵人时机">事业财运</option>
+          <option value="流年大运：当前运势、近三年走势、机遇与挑战">流年大运</option>
+          <option value="健康分析：五行缺失与健康倾向、需注意方面">健康分析</option>
+          <option value="custom">自定义问题↓</option>
+        </select>
+      </div>
+      <div class="form-group full" id="custom-question-wrap" style="display:none">
+        <label>自定义问题</label>
+        <textarea id="f-custom" placeholder="如：今年适合换工作吗？我的婚期大概在哪一年？"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>出生时辰（点击选择，不知道可选"不详"）</label>
+        <div class="shichen-grid" id="shichen-grid"></div>
+      </div>
+    </div>
+    <button class="btn-calc" id="btn-calc" onclick="doCalculate()">
+      ☯ 立即排盘
+    </button>
+  </div>
+
+  <div id="spinner" class="spinner-wrap hidden">
+    <div class="spinner"></div>
+    <div class="spinner-text">正在推算命盘…</div>
+  </div>
+
+  <div id="error-area"></div>
+
+  <!-- ── 命盘展示 ── -->
+  <div id="chart-area" class="hidden"></div>
+
+  <!-- ── AI 解读 ── -->
+  <div id="reading-area" class="hidden">
+    <div class="reading-card">
+      <div class="reading-header">
+        <div class="reading-title">✦ AI 命理解读</div>
+        <div class="question-input-row">
+          <input id="ask-input" type="text" placeholder="追问，如：我今年财运怎样？" />
+          <button class="btn-reading" id="btn-reading" onclick="doReading()">开始解读</button>
+        </div>
+      </div>
+      <div class="reading-body" id="reading-body">
+        <div class="reading-placeholder">
+          ☯ 点击右上方「开始解读」，AI 将为您推算命盘格局<br>
+          <span style="font-size:12px;color:var(--muted)">约需 20-40 秒，请耐心等待</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<div class="footer">
+  本工具基于《三命通会》《滴天髓》陆致极体系、梁湘润体系推算<br>
+  仅供学习娱乐，不构成人生决策建议
+</div>
+
+<script>
+  // ── 时辰数据 ─────────────────────────────────────────────────────────────
+  const SHICHEN = [
+    { name: '子时', time: '23-01', hour: 23 },
+    { name: '丑时', time: '01-03', hour: 1 },
+    { name: '寅时', time: '03-05', hour: 3 },
+    { name: '卯时', time: '05-07', hour: 5 },
+    { name: '辰时', time: '07-09', hour: 7 },
+    { name: '巳时', time: '09-11', hour: 9 },
+    { name: '午时', time: '11-13', hour: 11 },
+    { name: '未时', time: '13-15', hour: 13 },
+    { name: '申时', time: '15-17', hour: 15 },
+    { name: '酉时', time: '17-19', hour: 17 },
+    { name: '戌时', time: '19-21', hour: 19 },
+    { name: '亥时', time: '21-23', hour: 21 },
+    { name: '不详', time: '', hour: -1 },
+  ];
+
+  let selectedHour = -1;
+  let currentReadingId = null;
+  let readingStream = null;
+
+  // 渲染时辰选择按钮
+  const grid = document.getElementById('shichen-grid');
+  SHICHEN.forEach((sc, idx) => {
+    const btn = document.createElement('div');
+    btn.className = 'shichen-btn';
+    btn.innerHTML = `<div>${sc.name}</div><div class="shichen-sub">${sc.time || '—'}</div>`;
+    btn.onclick = () => {
+      document.querySelectorAll('.shichen-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedHour = sc.hour;
+    };
+    grid.appendChild(btn);
+  });
+
+  // 自定义问题切换
+  document.getElementById('f-question-preset').addEventListener('change', function() {
+    document.getElementById('custom-question-wrap').style.display =
+      this.value === 'custom' ? 'block' : 'none';
+  });
+
+  // ── 五行颜色 ─────────────────────────────────────────────────────────────
+  const WX_COLOR = {
+    '木': '#27ae60', '火': '#e74c3c', '土': '#e67e22', '金': '#f0c060', '水': '#3498db'
+  };
+
+  function fmt(n) { return n >= 1000 ? (n/1000).toFixed(1)+'K' : n; }
+
+  // ── 排盘 ─────────────────────────────────────────────────────────────────
+  async function doCalculate() {
+    const name = document.getElementById('f-name').value.trim() || '命主';
+    const gender = document.getElementById('f-gender').value;
+    const year = parseInt(document.getElementById('f-year').value);
+    const month = parseInt(document.getElementById('f-month').value);
+    const day = parseInt(document.getElementById('f-day').value);
+    const hour = selectedHour >= 0 ? selectedHour : 12;
+
+    if (!year || !month || !day) {
+      showError('请填写完整的出生年月日');
+      return;
+    }
+
+    const preset = document.getElementById('f-question-preset').value;
+    const question = preset === 'custom'
+      ? (document.getElementById('f-custom').value.trim() || '综合命运解读')
+      : preset;
+
+    document.getElementById('btn-calc').disabled = true;
+    document.getElementById('chart-area').classList.add('hidden');
+    document.getElementById('reading-area').classList.add('hidden');
+    document.getElementById('spinner').classList.remove('hidden');
+    document.getElementById('error-area').innerHTML = '';
+
+    try {
+      const res = await fetch('/api/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, gender, year, month, day, hour, minute: 0, question }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showError(data.detail || '排盘失败，请检查日期'); return; }
+      currentReadingId = data.reading_id;
+      renderChart(data);
+      document.getElementById('reading-area').classList.remove('hidden');
+      document.getElementById('reading-body').innerHTML =
+        `<div class="reading-placeholder">命盘已就绪 ☯<br>点击右上方「开始解读」获取 AI 命理分析</div>`;
+    } catch(e) {
+      showError('网络错误，请重试');
+    } finally {
+      document.getElementById('spinner').classList.add('hidden');
+      document.getElementById('btn-calc').disabled = false;
+    }
+  }
+
+  // ── 渲染命盘 ─────────────────────────────────────────────────────────────
+  function renderChart(d) {
+    const cols = ['年', '月', '日', '时'];
+    const ps = cols.map(c => d.pillars[c]);
+
+    function elemTag(e) {
+      return `<span class="elem-tag elem-${e}">${e}</span>`;
+    }
+
+    function shishenTag(s) {
+      const cls = s === '日主' ? 'shishen-rizhun' : '';
+      return `<span class="shishen-tag ${cls}">${s}</span>`;
+    }
+
+    // 四柱表格
+    const headerRow = `<tr><th class="row-label"></th>${cols.map(c=>`<th>${c}柱</th>`).join('')}</tr>`;
+    const row1 = `<tr><td class="row-label">天干十神</td>${ps.map(p=>`<td>${shishenTag(p.shishen_stem)}</td>`).join('')}</tr>`;
+    const row2 = `<tr><td class="row-label">天干</td>${ps.map(p=>`<td>
+      <div class="ganzhi-big" style="color:${WX_COLOR[p.stem_element]}">${p.stem}</div>
+      <div>${elemTag(p.stem_element)}</div>
+    </td>`).join('')}</tr>`;
+    const row3 = `<tr><td class="row-label">地支</td>${ps.map(p=>`<td>
+      <div class="ganzhi-big" style="color:${WX_COLOR[p.branch_element]}">${p.branch}</div>
+      <div>${elemTag(p.branch_element)}</div>
+    </td>`).join('')}</tr>`;
+    const row4 = `<tr><td class="row-label">地支十神</td>${ps.map(p=>`<td>${shishenTag(p.shishen_branch)}</td>`).join('')}</tr>`;
+    const row5 = `<tr><td class="row-label">藏干</td>${ps.map(p=>`<td class="canggan-cell">${p.canggan.join('·')}</td>`).join('')}</tr>`;
+
+    const table = `<table class="pillar-table">${headerRow}${row1}${row2}${row3}${row4}${row5}</table>`;
+
+    // 五行统计
+    const wx = d.wuxing;
+    const maxWx = Math.max(...Object.values(wx)) || 1;
+    const wxRows = Object.entries(wx).map(([k, v]) => `
+      <div class="wx-row">
+        <div class="wx-name" style="color:${WX_COLOR[k]}">${k}</div>
+        <div class="wx-bar-bg">
+          <div class="wx-bar-fill" style="width:${(v/maxWx*100).toFixed(0)}%;background:${WX_COLOR[k]}"></div>
+        </div>
+        <div class="wx-score">${v}</div>
+      </div>`).join('');
+
+    // 大运
+    const dyItems = (d.dayun || []).slice(0, 8).map(dy => `
+      <div class="dayun-item">
+        <div class="dy-gz">${dy.ganzhi}</div>
+        <div class="dy-age">${dy.start_age}岁起</div>
+        <div class="dy-elem"><span class="elem-tag elem-${dy.element}">${dy.element}</span></div>
+      </div>`).join('');
+
+    const html = `
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-name">${d.name}</span>
+          <span class="chart-shengxiao">生肖${d.shengxiao}</span>
+          <span class="chart-birth">${d.birth_str}（${d.gender}命）</span>
+        </div>
+        ${table}
+        <div class="wuxing-section">
+          <div class="wuxing-title">五行力量分布</div>
+          ${wxRows}
+        </div>
+        ${dyItems ? `<div class="dayun-section">
+          <div class="dayun-title">大运排列（${d.dayun_start_age}岁起运）</div>
+          <div class="dayun-row">${dyItems}</div>
+        </div>` : ''}
+      </div>`;
+
+    const el = document.getElementById('chart-area');
+    el.innerHTML = html;
+    el.classList.remove('hidden');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── AI 解读（SSE 流式）────────────────────────────────────────────────────
+  async function doReading() {
+    if (!currentReadingId) return;
+    const askInput = document.getElementById('ask-input').value.trim();
+
+    document.getElementById('btn-reading').disabled = true;
+    const body = document.getElementById('reading-body');
+    body.innerHTML = '';
+    let text = '';
+
+    // 使用 fetch + ReadableStream 处理 SSE
+    let url = `/api/reading/${currentReadingId}`;
+    if (askInput) {
+      url = `/api/ask?reading_id=${currentReadingId}&question=${encodeURIComponent(askInput)}`;
+    }
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        const err = await res.json();
+        showError(err.detail || '解读失败，请稍后重试');
+        document.getElementById('btn-reading').disabled = false;
+        return;
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const raw = decoder.decode(value);
+        const lines = raw.split('\n');
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = line.slice(6).trim();
+          if (payload === '[DONE]') break;
+          try {
+            const obj = JSON.parse(payload);
+            if (obj.t) {
+              text += obj.t;
+              body.innerHTML = formatReading(text) + '<span class="cursor-blink"></span>';
+              body.scrollTop = body.scrollHeight;
+            }
+            if (obj.error) { showError(obj.error); }
+          } catch(e) {}
+        }
+      }
+      // Remove cursor on done
+      body.innerHTML = formatReading(text);
+    } catch(e) {
+      showError('网络错误：' + e.message);
+    }
+    document.getElementById('btn-reading').disabled = false;
+  }
+
+  function formatReading(text) {
+    // 简单格式化：【标题】变色，换行保留
+    return text
+      .replace(/【([^】]+)】/g, '<strong>【$1】</strong>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function showError(msg) {
+    document.getElementById('error-area').innerHTML =
+      `<div class="error-box">⚠ ${msg}</div>`;
+  }
+</script>
+</body>
+</html>
