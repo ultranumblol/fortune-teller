@@ -126,7 +126,7 @@ def reading_stream(reading_id: str):
     def generate():
         try:
             with client.messages.stream(
-                model="claude-opus-4-5",
+                model="claude-haiku-3-5",
                 max_tokens=3000,
                 system=SYSTEM_PROMPT,
                 messages=[{"role": "user", "content": prompt_text}],
@@ -145,7 +145,7 @@ def reading_stream(reading_id: str):
     )
 
 
-@app.post("/api/ask")
+@app.get("/api/ask")
 def ask_question(reading_id: str, question: str):
     """追问（同一命盘，不同问题）"""
     if reading_id not in _pending:
@@ -163,7 +163,7 @@ def ask_question(reading_id: str, question: str):
     def generate():
         try:
             with client.messages.stream(
-                model="claude-opus-4-5",
+                model="claude-haiku-3-5",
                 max_tokens=1500,
                 system=SYSTEM_PROMPT,
                 messages=[{"role": "user", "content": new_prompt}],
