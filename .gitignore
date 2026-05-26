@@ -1,0 +1,29 @@
+# 环境变量
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# 输出文件（太大不提交）
+output/audio/*.mp3
+output/audio/*.wav
+
+# 输入小说文件（版权考虑不提交）
+input/*.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

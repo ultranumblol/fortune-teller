@@ -1,0 +1,56 @@
+# AI 说书自动化管线配置
+
+# 小说拆分设置
+split:
+  # 每期目标字数（15分钟 ≈ 4000-4500字）
+  target_words_per_episode: 4200
+  # 允许浮动范围
+  min_words: 3800
+  max_words: 4800
+  # 章节标题正则（用于识别章节边界）
+  chapter_pattern: "^第[一二三四五六七八九十百千零\\d]+[章回节]"
+
+# 说书稿生成设置
+script:
+  # LLM 模型
+  model: "deepseek-chat"
+  # DeepSeek API base URL
+  api_base: "https://api.deepseek.com"
+  # 说书风格 prompt
+  style: |
+    你是一位专业的现代有声书演播者，擅长将古典小说改编为适合听觉呈现的有声书稿。
+    要求：
+    1. 用现代白话文讲述，语言流畅自然，适合朗读
+    2. 保留原著精彩情节和人物对话，但用现代表述方式重新组织
+    3. 每期开头用一两句话承接上期内容，结尾留悬念引导下期
+    4. 对话部分要有角色感，适当加入语气描写
+    5. 删去冗余诗词和过于文言的段落，保留关键诗词并用白话解释
+    6. 控制在{target_words}字左右
+    7. 不要出现色情、暴力等敏感内容，遇到此类情节用含蓄方式带过
+  # 温度参数
+  temperature: 0.7
+  # 最大token
+  max_tokens: 8000
+
+# TTS 音频生成设置
+audio:
+  # Fish Audio 配置
+  provider: "fish_audio"
+  # Fish Audio API base
+  api_base: "https://api.fish.audio"
+  # 音色ID（可在 Fish Audio 平台选择/克隆）
+  # 默认使用平台热门中文男声，你可以替换为自己喜欢的
+  voice_id: ""
+  # 输出格式
+  format: "mp3"
+  # 采样率
+  sample_rate: 44100
+
+# 输出设置
+output:
+  # 说书稿输出目录
+  scripts_dir: "output/scripts"
+  # 音频输出目录
+  audio_dir: "output/audio"
+  # 文件命名格式
+  naming_pattern: "ep{episode:03d}_{title}"
